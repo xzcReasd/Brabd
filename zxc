@@ -1,0 +1,414 @@
+-- BrandNew Optimization Table
+-- Contains all frequently used services, variables, parts, and utilities
+
+local o = {
+    -- Services
+    plrs = game:GetService("Players"),
+    ws = game:GetService("Workspace"),
+    rs = game:GetService("RunService"),
+    uis = game:GetService("UserInputService"),
+    ts = game:GetService("TweenService"),
+    https = game:GetService("HttpService"),
+    PS = game:GetService('Players'),
+    RS = game:GetService('RunService'),
+    WS = game:GetService('Workspace'),
+    UIS = game:GetService('UserInputService'),
+    TS = game:GetService('TweenService'),
+    LS = game:GetService('Lighting'),
+    CG = game:GetService('CoreGui'),
+    SG = game:GetService('StarterGui'),
+    SP = game:GetService('StarterPack'),
+    SR = game:GetService('StarterPlayer'),
+    RP = game:GetService('ReplicatedStorage'),
+    RF = game:GetService('ReplicatedFirst'),
+    SS = game:GetService('SoundService'),
+    TV = game:GetService('TeleportService'),
+    BS = game:GetService('BadgeService'),
+    PL = game:GetService('PolicyService'),
+    PF = game:GetService('PathfindingService'),
+    DS = game:GetService('DataStoreService'),
+    CH = game:GetService('Chat'),
+    MSG = game:GetService('MessagingService'),
+    FS = game:GetService('FriendService'),
+    INS = game:GetService('InsertService'),
+    TM = game:GetService('Teams'),
+    VR = game:GetService('VRService'),
+    GU = game:GetService('GuiService'),
+    TScr = game:GetService('TextService'),
+    DB = game:GetService('Debris'),
+    PH = game:GetService('PhysicsService'),
+    LOC = game:GetService('LocalizationService'),
+    TST = game:GetService('TestService'),
+    VS = game:GetService('VoiceChatService'),
+    NS = game:GetService('NotificationService'),
+    HS = game:GetService('HttpService'),
+    CS = game:GetService('CollectionService'),
+    CP = game:GetService('ContentProvider'),
+    PPS = game:GetService('ProximityPromptService'),
+    TCS = game:GetService('TextChatService'),
+    ES = game:GetService('ExperienceService'),
+    PSS = game:GetService('PointsService'),
+    GS = game:GetService('GroupService'),
+    MS = game:GetService('MarketplaceService'),
+    
+    -- Common Variables
+    lp = game:GetService("Players").LocalPlayer,
+    mouse = game:GetService("Players").LocalPlayer:GetMouse(),
+    camera = game:GetService("Workspace").CurrentCamera,
+    
+    -- Часто используемые сокращения для частей персонажа
+    parts = {
+        HRP = "HumanoidRootPart",
+        HUM = "Humanoid",
+        HEAD = "Head",
+        TORSO = "UpperTorso",
+        LTORSO = "LowerTorso"
+    },
+    
+    -- R15 Body Parts
+    r15 = {
+        root = "HumanoidRootPart",
+        head = "Head",
+        torso = "UpperTorso",
+        ltorso = "LowerTorso",
+        larm = "LeftUpperArm",
+        llarm = "LeftLowerArm",
+        lhand = "LeftHand",
+        rarm = "RightUpperArm",
+        rlarm = "RightLowerArm",
+        rhand = "RightHand",
+        lleg = "LeftUpperLeg",
+        llleg = "LeftLowerLeg",
+        lfoot = "LeftFoot",
+        rleg = "RightUpperLeg",
+        rlleg = "RightLowerLeg",
+        rfoot = "RightFoot"
+    },
+    
+    -- Materials
+    materials = {
+        forcefield = Enum.Material.ForceField,
+        neon = Enum.Material.Neon,
+        plastic = Enum.Material.SmoothPlastic,
+        glass = Enum.Material.Glass
+    },
+    
+    -- Common Functions
+    funcs = {
+        wfc = function(parent, name) -- WaitForChild
+            return parent:WaitForChild(name)
+        end,
+        
+        dist = function(pos1, pos2) -- Distance
+            return (pos1-pos2).Magnitude
+        end,
+        
+        rgb = function(r, g, b) -- RGB Color
+            return Color3.fromRGB(r, g, b)
+        end,
+        
+        v3 = function(x, y, z) -- Vector3
+            return Vector3.new(x, y, z)
+        end,
+        
+        v2 = function(x, y) -- Vector2 
+            return Vector2.new(x, y)
+        end,
+        
+        cf = function(x, y, z) -- CFrame
+            return CFrame.new(x, y, z)
+        end,
+        
+        ang = function(x, y, z) -- CFrame Angles
+            return CFrame.Angles(x, y, z)
+        end,
+        
+        fromAxis = function(x, y, z, r) -- CFrame from axis
+            return CFrame.fromAxisAngle(Vector3.new(x, y, z), r)
+        end,
+        
+        lookAt = function(pos, target) -- CFrame lookAt
+            return CFrame.lookAt(pos, target)
+        end,
+        
+        raycast = function(origin, direction, params) -- Raycast
+            return workspace:Raycast(origin, direction, params)
+        end,
+        
+        round = function(num, decimalPlaces) -- Round number
+            local mult = 10^(decimalPlaces or 0)
+            return math.floor(num * mult + 0.5) / mult
+        end,
+        
+        clamp = function(value, min, max) -- Clamp value
+            return math.min(math.max(value, min), max)
+        end,
+        
+        lerp = function(a, b, t) -- Linear interpolation
+            return a + (b - a) * t
+        end,
+        
+        tween = function(instance, properties, time, style, direction) -- Create tween
+            return game:GetService("TweenService"):Create(
+                instance,
+                TweenInfo.new(time, style or Enum.EasingStyle.Quad, direction or Enum.EasingDirection.Out),
+                properties
+            )
+        end,
+        
+        is_visible = function(part, target) -- Check if part is visible to target
+            -- Simplified visibility check using raycast
+            local origin = target.Position
+            local direction = part.Position - origin
+            local distance = direction.Magnitude
+            
+            -- Normalize direction and multiply by distance for accurate ray length
+            direction = direction.Unit * distance
+            
+            -- Create raycast params
+            local params = RaycastParams.new()
+            params.FilterType = Enum.RaycastFilterType.Exclude
+            params.FilterDescendantsInstances = {target}
+            
+            -- Perform raycast
+            local result = workspace:Raycast(origin, direction, params)
+            
+            -- Check if the raycast hit the target part
+            return result and result.Instance == part
+        end
+    },
+    
+    -- Common Values
+    vals = {
+        inf = math.huge,
+        pi = math.pi,
+        rad = math.rad,
+        deg = math.deg,
+        rand = math.random,
+        floor = math.floor,
+        ceil = math.ceil,
+        abs = math.abs,
+        sin = math.sin,
+        cos = math.cos,
+        tan = math.tan,
+        asin = math.asin,
+        acos = math.acos,
+        atan = math.atan,
+        atan2 = math.atan2,
+        sqrt = math.sqrt,
+        min = math.min,
+        max = math.max,
+        sign = math.sign,
+        noise = math.noise,
+        clamp = math.clamp,
+        log = math.log,
+        exp = math.exp,
+        pow = math.pow,
+        ldexp = math.ldexp,
+        frexp = math.frexp,
+        fmod = math.fmod
+    },
+    
+    -- Events
+    events = {
+        renderstepped = game:GetService("RunService").RenderStepped,
+        heartbeat = game:GetService("RunService").Heartbeat,
+        stepped = game:GetService("RunService").Stepped,
+        input_began = game:GetService("UserInputService").InputBegan,
+        input_ended = game:GetService("UserInputService").InputEnded,
+        input_changed = game:GetService("UserInputService").InputChanged,
+        player_added = game:GetService("Players").PlayerAdded,
+        player_removing = game:GetService("Players").PlayerRemoving,
+        character_added = function(player) return player.CharacterAdded end,
+        character_removing = function(player) return player.CharacterRemoving end,
+        touched = function(part) return part.Touched end,
+        touching_ended = function(part) return part.TouchEnded end
+    },
+    
+    -- Commonly used variables to reduce local declarations
+    common_vars = {
+        -- Character parts
+        char = nil,
+        hrp = nil,
+        hum = nil,
+        head = nil,
+        rootPart = nil,
+        humanoid = nil,
+        character = nil,
+        
+        -- UI elements
+        status = nil,
+        speed = nil,
+        
+        -- Movement variables
+        baseSpeed = nil,
+        verticalSpeed = nil,
+        velocity = nil,
+        moveDir = nil,
+        camCF = nil,
+        move = nil,
+        newPos = nil,
+        curVel = nil,
+        speedMult = nil,
+        newVel = nil,
+        
+        -- Flags and states
+        hasBillboard = false,
+        mode = nil,
+        isActive = nil,
+        
+        -- File operations
+        configName = nil,
+        path = nil,
+        files = {},
+        
+        -- Connections
+        tempConn = nil,
+        conn = nil,
+        
+        -- Desync variables
+        shouldShowClone = nil,
+        materialName = nil,
+        material = nil,
+        color = nil,
+        previousStatus = nil,
+        isDesyncActive = nil,
+        relativeOffset = nil,
+        desyncFactor = nil,
+        
+        -- Visualization
+        originalPart = nil,
+        
+        -- Часто используемые переменные для трейсеров
+        startPos = nil,
+        endPos = nil,
+        gunBeam = nil,
+        
+        -- Часто используемые переменные для конфигов
+        config = nil,
+        highlight = nil,
+        
+        -- Часто используемые переменные для игроков
+        player = nil,
+        playerName = nil,
+        
+        -- Часто используемые переменные для обработки данных
+        success = nil,
+        result = nil,
+        data = nil,
+        
+        -- Часто используемые переменные для UI
+        textures = nil,
+        
+        -- Часто используемые переменные для частей тела
+        part = nil,
+        handle = nil
+    }
+}
+
+-- Connections Table
+o.conns = {}
+
+-- Connection Functions
+function o.conns:Add(conn)
+    table.insert(self, conn)
+end
+
+function o.conns:RemoveAll()
+    for _, conn in pairs(self) do
+        if conn then conn:Disconnect() end
+    end
+    table.clear(self)
+end
+
+-- Helper functions for common variable access
+function o.getChar()
+    o.common_vars.char = o.lp.Character
+    return o.common_vars.char
+end
+
+function o.getHrp()
+    o.common_vars.char = o.lp.Character
+    if o.common_vars.char then
+        o.common_vars.hrp = o.common_vars.char:FindFirstChild(o.r15.root)
+    end
+    return o.common_vars.hrp
+end
+
+function o.getHum()
+    o.common_vars.char = o.lp.Character
+    if o.common_vars.char then
+        o.common_vars.hum = o.common_vars.char:FindFirstChild("Humanoid")
+    end
+    return o.common_vars.hum
+end
+
+function o.getHead()
+    o.common_vars.char = o.lp.Character
+    if o.common_vars.char then
+        o.common_vars.head = o.common_vars.char:FindFirstChild("Head")
+    end
+    return o.common_vars.head
+end
+
+-- Helper Functions
+function o.GetChar()
+    return o.lp.Character or o.lp.CharacterAdded:Wait()
+end
+
+function o.GetHum()
+    local char = o.GetChar()
+    return char:FindFirstChild("Humanoid")
+end
+
+function o.GetRoot()
+    local char = o.GetChar()
+    return char:FindFirstChild("HumanoidRootPart")
+end
+
+function o.GetBodyPart(partName)
+    local char = o.GetChar()
+    return char:FindFirstChild(partName)
+end
+
+function o.IsR15()
+    local hum = o.GetHum()
+    return hum and hum.RigType == Enum.HumanoidRigType.R15
+end
+
+function o.IsAlive()
+    local char = o.lp.Character
+    local hum = char and char:FindFirstChild("Humanoid")
+    return char and hum and hum.Health > 0
+end
+
+function o.IsJumping()
+    local hum = o.GetHum()
+    return hum and hum:GetState() == Enum.HumanoidStateType.Jumping
+end
+
+function o.IsFalling()
+    local hum = o.GetHum()
+    return hum and hum:GetState() == Enum.HumanoidStateType.Freefall
+end
+
+function o.IsGrounded()
+    local hum = o.GetHum()
+    return hum and hum:GetState() == Enum.HumanoidStateType.Running
+end
+
+-- Добавляем функцию для получения материала по имени
+function o.getMaterial(name)
+    if name == "ForceField" then
+        return o.materials.forcefield
+    elseif name == "Neon" then
+        return o.materials.neon
+    elseif name == "SmoothPlastic" then
+        return o.materials.plastic
+    elseif name == "Glass" then
+        return o.materials.glass
+    end
+    return o.materials.forcefield
+end
+
+return o 
